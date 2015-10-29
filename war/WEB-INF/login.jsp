@@ -2,7 +2,7 @@
     pageEncoding="ISO-8859-1"%>
    
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<html style=" height: 100%;">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Log In</title>
@@ -26,17 +26,18 @@ clear:both;
     margin: 0px;
     //background-color: rgba(255, 255, 255, .3);	
         color: black;
-    
+     height: 100%;
     background-size: cover;
     background-attachment: fixed;
 }
 #content{
-    width: 1365px;
+   width: auto;
     background-color: rgba(0, 0, 0, .5);
     height: 667px;
     position: relative;
     left: 0;
     top: 0;
+    height: 100%;
 }
 #first{
 font-size: 34px;

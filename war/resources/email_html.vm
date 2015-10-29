@@ -1,0 +1,45 @@
+  <html>
+    <head>
+      <title>ToDoo List</title>
+    </head>
+
+
+    <body>
+      <center>
+      <div><b>$petList.size() task ToDo!</b></div>
+      
+      <div>   
+      #set( $count = 1 )  
+      <table style="font-family:Arial, Helvetica, sans-serif;color:#666;font-size:12px;text-shadow: 1px 1px 0px #fff;background:#eaebec;margin:20px;border:#ccc 1px solid;border-radius:3px;">
+      <tr style="text-align: center;	padding-left:20px;">
+      <th style="padding:21px 25px 22px 25px;	border-top:1px solid #fafafa;	border-bottom:1px solid #e0e0e0;	background: #ededed;"></th>
+      <th style="padding:21px 25px 22px 25px;	border-top:1px solid #fafafa;	border-bottom:1px solid #e0e0e0;	background: #ededed;">date</th>
+      <th style="padding:21px 25px 22px 25px;	border-top:1px solid #fafafa;	border-bottom:1px solid #e0e0e0;	background: #ededed;">listname</th>
+      <th style="padding:21px 25px 22px 25px;	border-top:1px solid #fafafa;	border-bottom:1px solid #e0e0e0;	background: #ededed;">todo</th>
+      </tr>
+        #foreach( $pet in $petList )	
+          <tr style="text-align: center;	padding-left:20px;">
+            <td style="padding:18px;	border-top: 1px solid #ffffff;	border-bottom:1px solid #e0e0e0;	border-left: 1px solid #e0e0e0;	background: #fafafa;">
+            $count)
+            </td>
+            <td style="padding:18px;	border-top: 1px solid #ffffff;	border-bottom:1px solid #e0e0e0;	border-left: 1px solid #e0e0e0;	background: #fafafa;">
+            $pet.date
+            </td>
+            <td style="padding:18px;	border-top: 1px solid #ffffff;	border-bottom:1px solid #e0e0e0;	border-left: 1px solid #e0e0e0;	background: #fafafa;">
+            $pet.listname
+            </td>
+            <td style="padding:18px;	border-top: 1px solid #ffffff;	border-bottom:1px solid #e0e0e0;	border-left: 1px solid #e0e0e0;	background: #fafafa;">
+            $pet.todo
+            </td>
+          </tr>
+          #set( $count = $count + 1 )
+        #end
+      </table>
+      </div>
+    <div> <i>Have a <b>Great</b> Day!</i></div>
+    
+     <div>www.todoo-list.appspot.com</div>
+      </center>
+ 
+    </body>
+  </html>

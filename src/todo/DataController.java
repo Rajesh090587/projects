@@ -149,15 +149,15 @@ public class DataController {
 	
 	//*************************adding the list name here*******************************//
 	
-	@RequestMapping(value="/addlistname/{listname}", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/addlistname/{listname}", method=RequestMethod.GET )
 	@ResponseBody
 	public String addinglistnamehere(@PathVariable String listname,HttpSession session){
 		String email = (String) session.getAttribute("email");
 		String userid = (String) session.getAttribute("id");
 		System.out.println("document  "+email);
 		System.out.println("document  "+userid);
-	System.out.println("id"+listname);
-	 PersistenceManager pm = PMF.get().getPersistenceManager();
+		System.out.println("id"+listname);
+		PersistenceManager pm = PMF.get().getPersistenceManager();
 		ListClass listobj=new ListClass();
 		listobj.setUserid(userid);
 		listobj.setListname(listname);
@@ -168,17 +168,17 @@ public class DataController {
 			pm.close();
 		}
 	
-	Gson gson = new Gson();
-    //convert java object to JSON format,
-	//and returned as JSON formatted string
-	String json = gson.toJson(listobj);
-	System.out.println(json);
-	return json;
-	}
+		Gson gson = new Gson();
+	    //convert java object to JSON format,
+		//and returned as JSON formatted string
+		String json = gson.toJson(listobj);
+		System.out.println(json);
+		return json;
+		}
 	
 	
-	
-	@RequestMapping(value="/get", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//*****************this is the default call to return the number of list for the user logged in ************//
+	@RequestMapping(value="/get", method=RequestMethod.GET )
 	@ResponseBody
 	public String defaultcall(HttpSession session){
 		String email = (String) session.getAttribute("email");
@@ -203,9 +203,11 @@ public class DataController {
 		String json = gson.toJson(results);
 		System.out.println(json);
 		return json;
-	}
+		}
 	
-	@RequestMapping(value="/getdata", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//********************this is the default call to return the data for the current date****************//
+	
+	@RequestMapping(value="/getdata", method=RequestMethod.GET )
 	@ResponseBody
 	public String defaultdatacall(HttpSession session){
 		String email = (String) session.getAttribute("email");
@@ -270,11 +272,10 @@ public class DataController {
 		String json = gson.toJson(filter);
 		System.out.println(json);
 		return json;
+		}
 	
-	}
-	
-	
-	@RequestMapping(value="/deletetodo/{id}", method=RequestMethod.POST ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//***********this method will delete the todo in the list using the list id******************//
+	@RequestMapping(value="/deletetodo/{id}", method=RequestMethod.POST )
 	@ResponseBody
 	public String deletetodo(@PathVariable String id,HttpSession session){
 		System.out.println("to delete"+id);
@@ -297,9 +298,10 @@ public class DataController {
 		return id;
 	}
 	
-	@RequestMapping(value="/addtodo/{listname}", method=RequestMethod.POST ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//*******************this method will add the todo in the corresponding list***************@PathVariable("app") String app//
+	@RequestMapping(value="/addtodo/{listname}/{date}", method=RequestMethod.POST )
 	@ResponseBody
-	public String addtodo(@PathVariable String listname,@RequestBody String todo,HttpSession session) throws java.text.ParseException{
+	public String addtodo(@PathVariable("listname") String listname,@PathVariable("date") Date date,@RequestBody String todo,HttpSession session) throws java.text.ParseException{
 		System.out.println("susscess fully got in addtodo"+todo);
 		System.out.println(listname);
 		Long longid=Long.parseLong(listname);
@@ -318,27 +320,34 @@ public class DataController {
 			e.printStackTrace();
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		String dateformatted=formatter.format(date);
+		Date dateobj = formatter.parse(dateformatted);
+		System.out.println(""+dateobj);
+		System.out.println(email +" document loaded "+date);
 		String content = (String) jsonObject.get("todotxt");	
 		String datestr = (String) jsonObject.get("date");
-		Date dateobj = formatter.parse(datestr);
+		System.out.println("date string check"+datestr);
+		//Date dateobj = formatter.parse(datestr);
 		System.out.println(content);
 		Todo addtodo=new Todo();
 		Long listid=Long.parseLong(listname);
-		Date date=new Date();
+		Date newdate=new Date();
 		System.out.println(listid);
 		
 		addtodo.setListid(listid);
 		addtodo.setUserid(userid);
 		addtodo.setTodo(content);
 		addtodo.setDate(dateobj);
-		addtodo.setCreateddate(date);
+		addtodo.setCreateddate(newdate);
 		addtodo.setListname(listnamegot);
 		addtodo.setUseremail(email);
 		addtodo.setUsername(name);
 		
 		
 		try {
+			
 			pm.makePersistent(addtodo);	
+			System.out.println("run make persistent");
 		} finally {
 			System.out.println("successfully added");
 			pm.close();
@@ -351,18 +360,26 @@ public class DataController {
 		System.out.println(json);
 		return json;
 	}
-	
-	@RequestMapping(value="/date/{date}", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//***********this method returns the data for the incoming date*****************//
+	@RequestMapping(value="/date/{date}", method=RequestMethod.GET )
 	@ResponseBody
-	public String datebuttoncall(@PathVariable String date,HttpSession session) throws java.text.ParseException{
+	public String datebuttoncall(@PathVariable Date date,HttpSession session) throws java.text.ParseException{
 		String email = (String) session.getAttribute("email");
 		String userid = (String) session.getAttribute("id");
+		//Tue Oct 2015
+		//Tue Dec 30 00:00:00 IST 2014
+		//Tue Dec 2015
+		//"EEE M/dd"
+		SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd");
+		String dateformatted=formatter1.format(date);
+		Date dateobj = formatter1.parse(dateformatted);
+		System.out.println(""+dateobj);
 		System.out.println(email +" document loaded "+date);
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM yyyy");
 		
-		Date dateobj = formatter.parse(date);
-		System.out.println(dateobj);
-		System.out.println(formatter.format(dateobj));
+		//Date dateobj = formatter.parse(date);
+		//System.out.println(dateobj);
+		//System.out.println(formatter.format(dateobj));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query q = pm.newQuery(Todo.class, "userid == value");
 		q.declareParameters("String value");
@@ -376,8 +393,9 @@ public class DataController {
 	         currentUser = (Todo)iter.next();
 	         System.out.println(currentUser.getDate());
 	         Date getdate=currentUser.getDate();
-	         String getdatestr=formatter.format(getdate);
-	         if(getdatestr.equals(date)){
+	         String getdatestr=formatter1.format(getdate);
+	         System.out.println(getdatestr+"   "+dateformatted);
+	         if(getdatestr.equals(dateformatted)){
 	        	 filter.add(currentUser);
 	         }
 	    }
@@ -392,60 +410,100 @@ public class DataController {
 		return json;
 	}
 	
-	@RequestMapping(value="/date/prev/{date}", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//***************this method returns the date by sub 1 to the incoming date ***************//
+	@RequestMapping(value="/date/prev/{date}", method=RequestMethod.GET )
 	@ResponseBody
-	public String prevdatebuttoncall(@PathVariable String date,HttpSession session) throws java.text.ParseException{
-		System.out.println(date	);
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	public String prevdatebuttoncall(@PathVariable Date date,HttpSession session) throws java.text.ParseException{
+		System.out.println("came into the prev call method"+date	);
+		//Tue Oct 2015
+		//Tue Dec 30 00:00:00 IST 2014
+		SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM yyyy");
+		//Date dateobj = formatter.parse(date);
+		//System.out.println(dateobj);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.add(Calendar.DAY_OF_YEAR,-2);
+		Date oneDayBefore= cal.getTime();
 		
-		Date dateobj = formatter.parse(date);
-		System.out.println(dateobj);
+		ArrayList<String> adddate=new ArrayList<String>();
+		for(int i=0;i<5;i++){
+			Date oneDayBefo= cal.getTime();
+			
+			cal.setTime(oneDayBefo);
+			cal.add(Calendar.DAY_OF_YEAR,-1);
+			oneDayBefo= cal.getTime();
+			String datebefore=formatter.format(oneDayBefo);
+			
+			
+			adddate.add(datebefore);
+			System.out.println(datebefore);
+		}
 		
-		 Calendar cal = Calendar.getInstance();
-		 cal.setTime(dateobj);
-		 cal.add(Calendar.DAY_OF_YEAR,-1);
-		 Date oneDayBefore= cal.getTime();
+		
 		System.out.println("yest =="+oneDayBefore);
-		
-		
 		String datebefore=formatter.format(oneDayBefore);
-		
 		System.out.println(formatter.format(oneDayBefore));
+		
 		Gson gson = new Gson();
 	    //convert java object to JSON format,
 		//and returned as JSON formatted string
-		String json = gson.toJson(datebefore);
+		String json = gson.toJson(oneDayBefore);
 		System.out.println(json);
+		System.out.println("end of the prev call method");
 		return json;
 	}
-	
-	@RequestMapping(value="/date/next/{date}", method=RequestMethod.GET ,produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	//***************this method returns the date by adding 1 to the incoming date ***************//
+	@RequestMapping(value="/date/next/{date}", method=RequestMethod.GET )
 	@ResponseBody
-	public String nextdatebuttoncall(@PathVariable String date,HttpSession session) throws java.text.ParseException{
+	public String nextdatebuttoncall(@PathVariable Date date,HttpSession session) throws java.text.ParseException{
 		System.out.println(date	);
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		
-		Date dateobj = formatter.parse(date);
-		System.out.println(dateobj);
+		//Date dateobj = formatter.parse(date);
+		//System.out.println(dateobj);
 		
 		 Calendar cal = Calendar.getInstance();
-		 cal.setTime(dateobj);
+		 cal.setTime(date);
 		 cal.add(Calendar.DAY_OF_YEAR,+1);
-		 Date oneDayBefore= cal.getTime();
-		System.out.println("yest =="+oneDayBefore);
+		 Date oneDayAfter= cal.getTime();
+		System.out.println("yest =="+oneDayAfter);
 		
 		
-		String datebefore=formatter.format(oneDayBefore);
+		String datebefore=formatter.format(oneDayAfter);
 		
-		System.out.println(formatter.format(oneDayBefore));
+		System.out.println(formatter.format(oneDayAfter));
 		Gson gson = new Gson();
 	    //convert java object to JSON format,
 		//and returned as JSON formatted string
-		String json = gson.toJson(datebefore);
+		String json = gson.toJson(oneDayAfter);
 		System.out.println(json);
 		return json;
 	}
 
-	
+	@RequestMapping(value="/deletelist/{id}", method=RequestMethod.POST )
+	@ResponseBody
+	public String deletelist(@PathVariable Long id,HttpSession session){
+		System.out.println("susscess fully got in deletelist "+id);
+		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+
+		try {
+            System.out.println("hi1");
+			ListClass obj = pm.getObjectById(ListClass.class, id);
+			System.out.println("hi2");
+			System.out.println(obj.getId());
+			System.out.println(obj.getListname());
+			pm.deletePersistent(obj);
+		} finally {
+			pm.close();
+		}
+		
+		Gson gson = new Gson();
+	    //convert java object to JSON format,
+		//and returned as JSON formatted string
+		String json = gson.toJson(id);
+		System.out.println(json);
+		return json;
+	}
 	
 }

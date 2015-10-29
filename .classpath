@@ -69,5 +69,6 @@
 	<classpathentry kind="lib" path="C:/Users/User.INTERN-42-WIN/Downloads/jackson-core-asl-1.5.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/User.INTERN-42-WIN/Downloads/jackson-mapper-asl-1.5.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/User.INTERN-42-WIN/Downloads/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/User.INTERN-42-WIN/Downloads/velocity-1.7-dep.jar/velocity-1.7-dep.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

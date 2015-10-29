@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
@@ -15,16 +18,23 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.gson.Gson;
 
 import java.util.logging.Logger;
 
 @Controller
 public class LoginController {
-	
+	public static List<User> logstatus=new ArrayList<User>();
 	@RequestMapping("/")  
     public ModelAndView helloWorld() {  
       
@@ -36,16 +46,16 @@ public class LoginController {
 	@RequestMapping("/glogin")  
     public ModelAndView authen() {  
       
-		return new ModelAndView("redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri=http://1-dot-todoo-list.appspot.com/get&response_type=code&client_id=155586497323-o309bl5dqp1kfbkjr540ci2i0c3eu1u4.apps.googleusercontent.com&approval_prompt=force&scope=email&access_type=online");
+		return new ModelAndView("redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri=http://localhost:8888/get&response_type=code&client_id=21895785036-j4gre0d0thmqn9e3ac13ab5bq4l5akt5.apps.googleusercontent.com&approval_prompt=force&scope=email&access_type=online");
     
 	}  
 	
 	@RequestMapping("/get")  
     public ModelAndView getValue(@RequestParam("code") String note,HttpSession session) throws IOException {  
 	
-			String clientId="155586497323-o309bl5dqp1kfbkjr540ci2i0c3eu1u4.apps.googleusercontent.com";
-			String clientSecret="xPJ0gQuAUAIgonpT4kohzAIx";
-			String redirect_url="http://1-dot-todoo-list.appspot.com/get";
+			String clientId="21895785036-j4gre0d0thmqn9e3ac13ab5bq4l5akt5.apps.googleusercontent.com";
+			String clientSecret="XbW_r8rTTQRvR0nzbTaZfSYJ";
+			String redirect_url="http://localhost:8888/get";
 			System.out.println(""+note);
 			String grant_type="authorization_code";
 			URL obj = new URL("https://www.googleapis.com/oauth2/v3/token?client_id="+clientId+"&client_secret=" + clientSecret+ "&redirect_uri=" + redirect_url + "&grant_type="+ grant_type + "&code=" + note);
@@ -106,30 +116,94 @@ public class LoginController {
 					user.setUsername(name);
 					user.setEmail(email);
 					user.setId(id);
+					
 					pm.makePersistent(user);
 				}
 				else{
 					System.out.println("User exist already:");
 				}
+				
+				Query q2 = pm.newQuery(User.class, "id == value");
+				q2.declareParameters("String value");
+			    List<User> result = (List<User>) q.execute(id);
+			    Iterator iter = result.iterator();
+			    User getlist = null;
+			    while (iter.hasNext())
+			    {
+			         getlist = (User)iter.next();
+			       logstatus.add(getlist);
+			    }
 					
 			} finally {
 				q.closeAll();
 				pm.close();
 			}
+			System.out.println(logstatus);
 			
+			
+			
+			//logstatus.add();
+			Gson gson = new Gson();
+		    //convert java object to JSON format,
+			//and returned as JSON formatted string
+			String json = gson.toJson(logstatus);
+			ChannelService channelService = ChannelServiceFactory.getChannelService();
+			channelService.sendMessage(new ChannelMessage("logger", json));
 			ModelAndView view=new ModelAndView("redirect:first");
 			
 			return view;	
 	}
+	
+	
 	@RequestMapping("first")  
 	public String toHellopage(ModelMap model,HttpSession session){
 		
 		return "mainpage";
 	} 
+	
+	
+	@RequestMapping(value="/triggerchannel", method=RequestMethod.GET )
+	@ResponseBody
+	public String datebuttoncall(HttpSession session) throws java.text.ParseException{
+		
+		
+		Gson gson = new Gson();
+	    //convert java object to JSON format,
+		//and returned as JSON formatted string
+		String json = gson.toJson(logstatus);
+		ChannelService channelService = ChannelServiceFactory.getChannelService();
+		channelService.sendMessage(new ChannelMessage("logger", json));
+	return "triggered";
+	}
+	
+	
 	@RequestMapping("/logout")  
     public ModelAndView logout(HttpSession session) {  
-      
-    	if(session != null){
+		
+		String email = (String) session.getAttribute("email");
+		String userid = (String) session.getAttribute("id");
+		
+		String logout="logged out "+email+" "+userid;
+		Iterator iter = logstatus.iterator();
+		while (iter.hasNext())
+	    {
+		User	loggingoutuser = (User)iter.next();
+			String id=loggingoutuser.getId();
+			if(id.equals(userid)){
+				iter.remove();
+				
+			}
+	    }
+		
+		Gson gson = new Gson();
+	    //convert java object to JSON format,
+		//and returned as JSON formatted string
+		String json = gson.toJson(logstatus);
+		
+		ChannelService channelService = ChannelServiceFactory.getChannelService();
+		channelService.sendMessage(new ChannelMessage("logger", json));
+    	
+		if(session != null){
 			session.invalidate();
 			
 		}
